@@ -1,0 +1,18 @@
+#!/bin/bash
+
+SCRIPT_NAME=`basename $0`
+BASE_DIR=$(dirname `which $0`)
+
+if [[ $BASE_DIR != '.' ]]; then
+    SCRIPT_PATH=$(readlink -n $( type -p $0))
+    BASE_DIR=`dirname ${SCRIPT_PATH}`
+fi
+
+source ${BASE_DIR}/lib/conf
+source ${BASE_DIR}/lib/functions
+
+# TODO get project id
+# endpoint="${GITLAB}projects/:id/repository/branches/:branch/protect"
+
+endpoint="${GITLAB}projects/169/repository/branches/master/protect"
+curl -H "PRIVATE-TOKEN: ${GITLAB_TOKEN}" -X PUT ${endpoint} | python -mjson.tool

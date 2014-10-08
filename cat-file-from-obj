@@ -1,0 +1,38 @@
+#!/bin/bash
+
+BASE_DIR=$(dirname `which $0`)
+TMP_DIR=/tmp/git-stuff
+
+usage() {
+    echo "$(tput bold)Usage:$(tput sgr0)"
+    echo "  cat-file-from-sha [options]"
+    echo "$(tput bold)Options:$(tput sgr0)"
+    echo "  -f file path/name"
+    echo "  -r repository"
+    echo "  -s sha to show (default is HEAD)"
+    exit 1
+}
+
+repo= file=
+sha=HEAD
+
+while getopts r:s:f: opt; do
+    case $opt in
+        f) file=${OPTARG} ;;
+        r) repo=${OPTARG} ;;
+        s) sha=${OPTARG} ;;
+        *) usage ;;
+    esac
+done
+
+if [[ $repo == '' ||
+      $sha == '' ||
+      $file == ''
+    ]]; then
+    usage
+fi
+
+git clone --bare ${repo} ${TMP_DIR} > /dev/null 2>&1
+cd ${TMP_DIR}
+git cat-file -p $(git ls-tree ${sha} ${file} | cut -d " " -f 3 | cut -f 1)
+cd ${BASE_DIR} && rm -rf ${TMP_DIR}

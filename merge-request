@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# TODO assignto option
+
+SCRIPT_NAME=`basename $0`
+BASE_DIR=$(dirname `which $0`)
+
+if [[ $BASE_DIR != '.' ]]; then
+    SCRIPT_PATH=$(readlink -n $( type -p $0))
+    BASE_DIR=`dirname ${SCRIPT_PATH}`
+fi
+
+source ${BASE_DIR}/lib/conf
+source ${BASE_DIR}/lib/functions
+
+usage() {
+    echo "${txtbld}Usage:${txtrst}"
+    echo "  ${SCRIPT_NAME} {-i | -p} [options]"
+    echo "${txtbld}Options:${txtrst}"
+    echo "  -i project id"
+    echo "  -p project_name"
+    echo "  -n namespace  -- default namespace is ${DEFAULT_NS}"
+    echo "  -t 'title of merge request'"
+    echo "  -s source_branch"
+    echo "  -d destination/target_branch"
+    echo " ${bldred}The project id will be the -i value or the -p value concatenated with the namespace${txtrst}"
+    exit 1
+}
+
+id= title= sbranch= tbranch=
+ns=$DEFAULT_NS
+
+while getopts i:p:n:t:s:d: opt; do
+    case $opt in
+        i) id=$(urlencode "${OPTARG}") ;;
+        n) ns=$OPTARG ;;
+        p) id=$(urlencode "${ns}/${OPTARG}") ;;
+        t) title=$(urlencode "${OPTARG}") ;;
+        s) sbranch=$OPTARG ;;
+        d) tbranch=$OPTARG ;;
+        *) usage ;;
+    esac
+done
+
+shift $((OPTIND - 1))
+
+# this will print usage
+if [[ $id == '' ||
+      $title == '' ||
+      $sbranch == '' ||
+      $tbranch == ''
+    ]]; then
+    usage
+fi
+
+endpoint="${GITLAB}projects/${id}/merge_requests"
+data="source_branch=${sbranch}&target_branch=${tbranch}&title=${title}"
+
+curl --data "${data}" --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" "${endpoint}"
+echo
