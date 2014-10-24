@@ -1,0 +1,5 @@
+---
+# the env var GITLAB_TOKEN should be set
+# using the value of your gitlab api token
+gitlab_url: 'https://gitlaburl.com/api/v3/'
+default_namespace: 'something'

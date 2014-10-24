@@ -1,8 +1,13 @@
 #!/usr/bin/python
+""" get_user.py """
 
-import inspect, os, myconf, unirest, json
+from json import dumps
+from unirest import get
 
-url = myconf.gitlaburl() + 'user'
+from config import Config
 
-resp = unirest.get(url, headers={"PRIVATE-TOKEN": myconf.token()})
-print json.dumps(resp.body, sort_keys=True, indent=4, separators=(',', ': '))
+cfg = Config()
+url = cfg.get(gitlaburl) + 'user'
+
+resp = get(url, headers={"PRIVATE-TOKEN": myconf.token()})
+print dumps(resp.body, sort_keys=True, indent=4, separators=(',', ': '))
